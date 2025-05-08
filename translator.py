@@ -1,138 +1,100 @@
 import easyocr
+
 from langdetect import detect
+from deep_translator import GoogleTranslator
+import cv2 as cv
 
-# Se ingresa ingles como idioma predeterminado
-reader = easyocr.Reader(["en"], gpu=False)
-results = reader.readtext("libroIngles.jpg")
+def detectLang (paragraph):
+    # Detectar idioma del texto
+    language = detect(paragraph)
 
-# Unir todo el texto en una sola cadena
-paragraph = " ".join([text for _, text, _ in results])
+    lang_dict = {
+        "af": "afrikáans", "ar": "árabe", "bg": "búlgaro", "bn": "bengalí",
+        "ca": "catalán", "cs": "checo", "cy": "galés", "da": "danés",
+        "de": "alemán", "el": "griego", "en": "inglés", "es": "español",
+        "et": "estonio", "fa": "persa", "fi": "finés", "fr": "francés",
+        "gu": "guyaratí", "he": "hebreo", "hi": "hindi", "hr": "croata",
+        "hu": "húngaro", "id": "indonesio", "it": "italiano", "ja": "japonés",
+        "kn": "canarés", "ko": "coreano", "lt": "lituano", "lv": "letón",
+        "mk": "macedonio", "ml": "malabar", "mr": "maratí", "ne": "nepalí",
+        "nl": "neerlandés", "no": "noruego", "pa": "panyabí", "pl": "polaco",
+        "pt": "portugués", "ro": "rumano", "ru": "ruso", "sk": "eslovaco",
+        "sl": "esloveno", "so": "somalí", "sq": "albanés", "sv": "sueco",
+        "sw": "suajili", "ta": "tamil", "te": "télugu", "th": "tailandés",
+        "tl": "tagalo", "tr": "turco", "uk": "ucraniano", "ur": "urdu",
+        "vi": "vietnamita", "zh": "chino (simplificado)", "zh-cn": "chino (simplificado)",
+        "zh-tw": "chino (tradicional)"
+    }
 
-#detects the language the text is in
-language = detect(paragraph)
-
-lang = language
-
-if lang = "af":
-    lang = "afrikaans"
-elif lang = "ar":
-    lang = "arabic"
-elif lang = "bg":
-    lang = "bulgarian"
-elif lang = "bn":
-    lang = "bengali"
-elif lang = "ca":
-    lang = "catalan"
-elif lang = "cs":
-    lang = "checo"
-elif lang = "cy":
-    lang = "gales"
-elif lang = "da":
-    lang = "danes"
-elif lang = "de":
-    lang = "aleman"
-elif lang = "el":
-    lang = "griego"
-elif lang = "en":
-    lang = "ingles"
-elif lang = "es":
-    lang = "espanol"
-elif lang = "et":
-    lang = "estonio"
-elif lang = "fa":
-    lang = "persa"
-elif lang = "fi":
-    lang = "fines"
-elif lang = "fr":
-    lang = "frances"
-elif lang = "gu":
-    lang = "gujarati"
-elif lang = "he":
-    lang = "hebreo"
-elif lang = "hi":
-    lang = "hindi"
-elif lang = "hr":
-    lang = "croata"
-elif lang = "hu":
-    lang = "hungaro"
-elif lang = "id":
-    lang = "indonesio"
-elif lang = "it":
-    lang = "italiano"
-elif lang = "ja":
-    lang = "japones"
-elif lang = "kn":
-    lang = "canares"
-elif lang = "ko":
-    lang = "coreano"
-elif lang = "lt":
-    lang = "lituano"
-elif lang = "lv":
-    lang = "leton"
-elif lang = "mk":
-    lang = "macedonio"
-elif lang = "ml":
-    lang = "malabar"
-elif lang = "mr":
-    lang = "marati"
-elif lang = "ne":
-    lang = "nepali"
-elif lang = "nl":
-    lang = "holandes"
-elif lang = "no":
-    lang = "noruego"
-elif lang = "pa":
-    lang = "panyabi"
-elif lang = "pl":
-    lang = "polaco"
-elif lang = "pt":
-    lang = "portuges"
-elif lang = "ro":
-    lang = "rumano"
-elif lang = "ru":
-    lang = "ruso"
-elif lang = "sk":
-    lang = "eslovaco"
-elif lang = "sl":
-    lang = "esloveno"
-elif lang = "so":
-    lang = "somali"
-elif lang = "sq":
-    lang = "albanes"
-elif lang = "sv":
-    lang = "sueco"
-elif lang = "sw":
-    lang = "suajili"
-elif lang = "ta":
-    lang = "tamil"
-elif lang = "te":
-    lang = "telugu"
-elif lang = "th":
-    lang = "tai"
-elif lang = "tl":
-    lang = "tagalo"
-elif lang = "tr":
-    lang = "turco"
-elif lang = "uk":
-    lang = "ucraniano"
-elif lang = "ur":
-    lang = "urdu"
-elif lang = "vi":
-    lang = "vietnamita"
-elif lang = "zh":
-    lang = "chino"
-elif lang = "zh-cn":
-    lang = "chino"
-elif lang = "cn":
-    lang = "chino"
-elif lang = "tw":
-    lang = "twi"
-elif lang = "zh-tw":
-    lang = "twi"
-    
-print(lang,":\n")
-print(paragraph)
+    lang_name = lang_dict.get(language, "desconocido")
+    print("\nEl texto está en: ", lang_name)
 
 
+def imageOption ():
+    # Leer imagen
+    img = cv.imread("libroEspanol.jpg")
+
+    # Convertir a espacio de color LAB
+    lab = cv.cvtColor(img, cv.COLOR_BGR2LAB)
+    l, a, b = cv.split(lab)
+
+    # Aplicar CLAHE en el canal L (luminosidad)
+    clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l)
+
+    # Recombinar los canales y volver a BGR
+    limg = cv.merge((cl, a, b))
+    img_clahe = cv.cvtColor(limg, cv.COLOR_LAB2BGR)
+
+    # Mostrar imagen mejorada
+    cv.imshow("Imagen mejorada con CLAHE", img_clahe)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+
+    # OCR para inglés y español por defecto
+    reader = easyocr.Reader(["en", "es"], gpu=False)
+    results = reader.readtext(img_clahe)
+
+    # Unir texto en un solo párrafo
+    paragraph = " ".join([text for _, text, _ in results])
+    print("Texto detectado:\n")
+    print(paragraph)
+
+    return paragraph
+
+def textOption():
+    paragraph = input("Escribe el texto a traducir: ")
+    return paragraph
 
 
+print("Hola! Con este codigo podras traducir un texto al idioma que quieras")
+print("Tienes 3 opciones: ")
+print("1. Subir un imagen con texto y traducirlo")
+print("2. Escribir un texto y traducirlo")
+print("3. Salir del programa")
+option = input("Por favor, escribe la opcion que deseas (1/2/3): ")
+
+while (option != "1" and option != "2" and option != "3"):
+    print("Opcion no valida")
+    option = input("Por favor, escribe la opcion que deseas (1/2/3): ")
+
+if (option == "1"):
+    paragraph = imageOption()
+elif (option == "2"):
+    paragraph = textOption()
+elif(option == "3"):
+    print("Hasta pronto!")
+    exit()
+
+detectLang(paragraph)
+
+# Pedir idioma de traducción al usuario
+dest_lang_input = input(" \n ¿A qué idioma quieres traducir el texto? (nombre del idioma en INGLÉS): ").strip().lower()
+
+# Traducir el texto
+try:
+    translated = GoogleTranslator(source='auto', target=dest_lang_input).translate(paragraph)
+    print("\nTexto traducido:")
+    print(translated)
+except Exception as e:
+    print(f"\n Error al traducir: {e}")
