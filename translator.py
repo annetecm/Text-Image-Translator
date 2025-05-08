@@ -1,10 +1,32 @@
 import easyocr
 from langdetect import detect
 from deep_translator import GoogleTranslator
+import cv2 as cv
+import numpy as np
+
+# Leer imagen
+img = cv.imread("libroEspanol.jpg")
+
+# Convertir a espacio de color LAB
+lab = cv.cvtColor(img, cv.COLOR_BGR2LAB)
+l, a, b = cv.split(lab)
+
+# Aplicar CLAHE en el canal L (luminosidad)
+clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+cl = clahe.apply(l)
+
+# Recombinar los canales y volver a BGR
+limg = cv.merge((cl, a, b))
+img_clahe = cv.cvtColor(limg, cv.COLOR_LAB2BGR)
+
+# Mostrar imagen mejorada
+cv.imshow("Imagen mejorada con CLAHE", img_clahe)
+cv.waitKey(0)
+cv.destroyAllWindows()
 
 # OCR para inglés y español por defecto
 reader = easyocr.Reader(["en", "es"], gpu=False)
-results = reader.readtext("libroEspanol.jpg")
+results = reader.readtext(img_clahe)
 
 # Unir texto en un solo párrafo
 paragraph = " ".join([text for _, text, _ in results])
@@ -32,11 +54,11 @@ lang_dict = {
     "zh-tw": "chino (tradicional)"
 }
 
-lang_name = lang_dict.get(language, "unknown")
-print("\n El texto está en:", lang_name)
+lang_name = lang_dict.get(language, "desconocido")
+print("\nEl texto está en:", lang_name)
 
-# Pedir idioma destino al usuario
-dest_lang_input = input("¿A qué idioma quieres traducir el texto? (ej: inglés, francés, etc.): ").strip().lower()
+# Pedir idioma de traducción al usuario
+dest_lang_input = input(" \n ¿A qué idioma quieres traducir el texto? (nombre del idioma en INGLÉS): ").strip().lower()
 
 # Traducir el texto
 try:
@@ -45,5 +67,3 @@ try:
     print(translated)
 except Exception as e:
     print(f"\n Error al traducir: {e}")
-
-
