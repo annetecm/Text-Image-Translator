@@ -1,8 +1,8 @@
 import easyocr
+
 from langdetect import detect
 from deep_translator import GoogleTranslator
 import cv2 as cv
-import numpy as np
 
 # Leer imagen
 img = cv.imread("libroEspanol.jpg")
